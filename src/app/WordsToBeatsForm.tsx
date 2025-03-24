@@ -17,7 +17,7 @@ import { Toggle } from "@/components/ui/toggle";
 import * as Tone from "tone";
 import { Visualizer } from "./Visualizer";
 
-const BEAT_TYPES = ["drums", "synth", "piano", "bass"];
+const BEAT_TYPES = ["drums", "synth", "piano", "bass", "guitar", "strings"]; // Added more instruments
 const NOTE_SCALES = ["major", "minor", "pentatonic", "blues", "chromatic"];
 
 // Define TypeScript interfaces
@@ -41,7 +41,7 @@ export default function WordsToBeatsForm() {
   const [bpm, setBpm] = useState(120);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [selectedBeatType, setSelectedBeatType] = useState(BEAT_TYPES[0]);
+  const [selectedBeatTypes, setSelectedBeatTypes] = useState<string[]>([BEAT_TYPES[0]]); // Allow multiple selections
   const [selectedScale, setSelectedScale] = useState(NOTE_SCALES[0]);
   const [synth, setSynth] = useState<TonePolySynth | null>(null);
   const [pattern, setPattern] = useState<string>("");
@@ -182,6 +182,12 @@ export default function WordsToBeatsForm() {
     recorderRef.current = recorder;
   };
 
+  const toggleBeatType = (type: string) => {
+    setSelectedBeatTypes((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+    );
+  };
+
   const handlePlayPause = async () => {
     if (isPlaying) {
       // Stop playback
@@ -244,62 +250,87 @@ export default function WordsToBeatsForm() {
         (time, idx) => {
           const shouldPlay = patternArray[idx as number] === "x";
           if (shouldPlay && notes[noteIndex]) {
-            // Play the note based on the selected beat type
-            switch (selectedBeatType) {
-              case "drums":
-                // For drums, we'll use a noise synth with different envelopes
-                const noise = new Tone.NoiseSynth({
-                  noise: { type: "white" },
-                  envelope: { attack: 0.005, decay: 0.1, sustain: 0 },
-                }).toDestination();
-                noise.triggerAttackRelease("16n", time);
-                break;
-              case "synth":
-                // Ensure synth is not null before using it
-                if (synth) {
-                  synth.triggerAttackRelease(notes[noteIndex], "8n", time);
-                } else {
-                  console.error("Synth is not initialized.");
-                }
-                break;
-              case "piano":
-                // For piano simulation
-                const piano = new Tone.Synth({
-                  oscillator: { type: "triangle" },
-                  envelope: {
-                    attack: 0.01,
-                    decay: 0.1,
-                    sustain: 0.3,
-                    release: 0.6,
-                  },
-                }).toDestination();
-                piano.triggerAttackRelease(notes[noteIndex], "8n", time);
-                break;
-              case "bass":
-                // For bass simulation
-                const bass = new Tone.Synth({
-                  oscillator: { type: "sine" },
-                  envelope: {
-                    attack: 0.05,
-                    decay: 0.2,
-                    sustain: 0.4,
-                    release: 0.8,
-                  },
-                }).toDestination();
-                // Play an octave lower
-                const bassNote = notes[noteIndex].replace(/(\d+)/, (match) =>
-                  String(parseInt(match) - 1)
-                );
-                bass.triggerAttackRelease(bassNote, "8n", time);
-                break;
-              default:
-                if (synth) {
-                  synth.triggerAttackRelease(notes[noteIndex], "8n", time);
-                } else {
-                  console.error("Synth is not initialized.");
-                }
-                break;
-            }
+            selectedBeatTypes.forEach((type) => {
+              switch (type) {
+                case "drums":
+                  // For drums, we'll use a noise synth with different envelopes
+                  const noise = new Tone.NoiseSynth({
+                    noise: { type: "white" },
+                    envelope: { attack: 0.005, decay: 0.1, sustain: 0 },
+                  }).toDestination();
+                  noise.triggerAttackRelease("16n", time);
+                  break;
+                case "synth":
+                  // Ensure synth is not null before using it
+                  if (synth) {
+                    synth.triggerAttackRelease(notes[noteIndex], "8n", time);
+                  } else {
+                    console.error("Synth is not initialized.");
+                  }
+                  break;
+                case "piano":
+                  // For piano simulation
+                  const piano = new Tone.Synth({
+                    oscillator: { type: "triangle" },
+                    envelope: {
+                      attack: 0.01,
+                      decay: 0.1,
+                      sustain: 0.3,
+                      release: 0.6,
+                    },
+                  }).toDestination();
+                  piano.triggerAttackRelease(notes[noteIndex], "8n", time);
+                  break;
+                case "bass":
+                  // For bass simulation
+                  const bass = new Tone.Synth({
+                    oscillator: { type: "sine" },
+                    envelope: {
+                      attack: 0.05,
+                      decay: 0.2,
+                      sustain: 0.4,
+                      release: 0.8,
+                    },
+                  }).toDestination();
+                  // Play an octave lower
+                  const bassNote = notes[noteIndex].replace(/(\d+)/, (match) =>
+                    String(parseInt(match) - 1)
+                  );
+                  bass.triggerAttackRelease(bassNote, "8n", time);
+                  break;
+                case "guitar":
+                  const guitar = new Tone.Synth({
+                    oscillator: { type: "sawtooth" },
+                    envelope: {
+                      attack: 0.02,
+                      decay: 0.2,
+                      sustain: 0.5,
+                      release: 0.8,
+                    },
+                  }).toDestination();
+                  guitar.triggerAttackRelease(notes[noteIndex], "8n", time);
+                  break;
+                case "strings":
+                  const strings = new Tone.Synth({
+                    oscillator: { type: "square" },
+                    envelope: {
+                      attack: 0.05,
+                      decay: 0.3,
+                      sustain: 0.6,
+                      release: 1.0,
+                    },
+                  }).toDestination();
+                  strings.triggerAttackRelease(notes[noteIndex], "8n", time);
+                  break;
+                default:
+                  if (synth) {
+                    synth.triggerAttackRelease(notes[noteIndex], "8n", time);
+                  } else {
+                    console.error("Synth is not initialized.");
+                  }
+                  break;
+              }
+            });
           }
 
           // Move to the next note in the sequence
@@ -381,7 +412,7 @@ export default function WordsToBeatsForm() {
       <CardContent className="space-y-4">
         {/* Visualizer */}
         <div className="w-full h-40 bg-gray-100 dark:bg-gray-800 rounded-md overflow-hidden">
-          <Visualizer isPlaying={isPlaying} beatType={selectedBeatType} />
+          <Visualizer isPlaying={isPlaying} beatType={selectedBeatTypes.join(", ")} />
         </div>
 
         <div className="space-y-2">
@@ -426,10 +457,10 @@ export default function WordsToBeatsForm() {
               {BEAT_TYPES.map((type) => (
                 <Toggle
                   key={type}
-                  pressed={selectedBeatType === type}
-                  onPressedChange={() => setSelectedBeatType(type)}
+                  pressed={selectedBeatTypes.includes(type)}
+                  onPressedChange={() => toggleBeatType(type)}
                   className={`w-full justify-center capitalize h-12 border border-gray-300 ${
-                    selectedBeatType === type
+                    selectedBeatTypes.includes(type)
                       ? "bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium"
                       : "bg-white hover:bg-gray-50 text-gray-600"
                   }`} // Add gray outline
