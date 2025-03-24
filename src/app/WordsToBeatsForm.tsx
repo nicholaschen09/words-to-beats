@@ -262,8 +262,12 @@ export default function WordsToBeatsForm() {
                 noise.triggerAttackRelease("16n", time);
                 break;
               case "synth":
-                // For synth, use the polySynth
-                synth.triggerAttackRelease(notes[noteIndex], "8n", time);
+                // Ensure synth is not null before using it
+                if (synth) {
+                  synth.triggerAttackRelease(notes[noteIndex], "8n", time);
+                } else {
+                  console.error("Synth is not initialized.");
+                }
                 break;
               case "piano":
                 // For piano simulation
