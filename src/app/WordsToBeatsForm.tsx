@@ -3,7 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -125,7 +131,21 @@ export default function WordsToBeatsForm() {
       minor: ["C4", "D4", "Eb4", "F4", "G4", "Ab4", "Bb4", "C5"],
       pentatonic: ["C4", "D4", "E4", "G4", "A4", "C5"],
       blues: ["C4", "Eb4", "F4", "F#4", "G4", "Bb4", "C5"],
-      chromatic: ["C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4", "C5"]
+      chromatic: [
+        "C4",
+        "C#4",
+        "D4",
+        "D#4",
+        "E4",
+        "F4",
+        "F#4",
+        "G4",
+        "G#4",
+        "A4",
+        "A#4",
+        "B4",
+        "C5",
+      ],
     };
 
     const currentScale = scales[selectedScale] || scales.major;
@@ -144,7 +164,7 @@ export default function WordsToBeatsForm() {
   const setupRecording = async () => {
     // Get the audio context and create a media stream destination node
     const audioContext = Tone.getContext().rawContext;
-    const dest = audioContext.createMediaStreamDestination();
+    const dest = (audioContext as AudioContext).createMediaStreamDestination();
 
     // Connect Tone.js master output to the media stream destination
     Tone.getDestination().connect(dest);
@@ -160,7 +180,7 @@ export default function WordsToBeatsForm() {
     };
 
     recorder.onstop = () => {
-      const blob = new Blob(chunksRef.current, { type: 'audio/webm' });
+      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
       const url = URL.createObjectURL(blob);
       setAudioUrl(url);
       setIsRecording(false);
@@ -237,7 +257,7 @@ export default function WordsToBeatsForm() {
                 // For drums, we'll use a noise synth with different envelopes
                 const noise = new Tone.NoiseSynth({
                   noise: { type: "white" },
-                  envelope: { attack: 0.005, decay: 0.1, sustain: 0 }
+                  envelope: { attack: 0.005, decay: 0.1, sustain: 0 },
                 }).toDestination();
                 noise.triggerAttackRelease("16n", time);
                 break;
@@ -249,7 +269,12 @@ export default function WordsToBeatsForm() {
                 // For piano simulation
                 const piano = new Tone.Synth({
                   oscillator: { type: "triangle" },
-                  envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 0.6 }
+                  envelope: {
+                    attack: 0.01,
+                    decay: 0.1,
+                    sustain: 0.3,
+                    release: 0.6,
+                  },
                 }).toDestination();
                 piano.triggerAttackRelease(notes[noteIndex], "8n", time);
                 break;
@@ -257,7 +282,12 @@ export default function WordsToBeatsForm() {
                 // For bass simulation
                 const bass = new Tone.Synth({
                   oscillator: { type: "sine" },
-                  envelope: { attack: 0.05, decay: 0.2, sustain: 0.4, release: 0.8 }
+                  envelope: {
+                    attack: 0.05,
+                    decay: 0.2,
+                    sustain: 0.4,
+                    release: 0.8,
+                  },
                 }).toDestination();
                 // Play an octave lower
                 const bassNote = notes[noteIndex].replace(/(\d+)/, (match) =>
@@ -293,9 +323,25 @@ export default function WordsToBeatsForm() {
   const handleRandomize = () => {
     // Generate random Lorem Ipsum-like text
     const words = [
-      "lorem", "ipsum", "dolor", "sit", "amet", "consectetur",
-      "adipiscing", "elit", "sed", "do", "eiusmod", "tempor",
-      "incididunt", "ut", "labore", "et", "dolore", "magna", "aliqua"
+      "lorem",
+      "ipsum",
+      "dolor",
+      "sit",
+      "amet",
+      "consectetur",
+      "adipiscing",
+      "elit",
+      "sed",
+      "do",
+      "eiusmod",
+      "tempor",
+      "incididunt",
+      "ut",
+      "labore",
+      "et",
+      "dolore",
+      "magna",
+      "aliqua",
     ];
 
     const randomLength = Math.floor(Math.random() * 10) + 5; // 5-15 words
@@ -355,8 +401,18 @@ export default function WordsToBeatsForm() {
 
         <Tabs defaultValue="beatType" className="mt-6">
           <TabsList className="grid w-full grid-cols-2 p-0 bg-gray-100">
-            <TabsTrigger value="beatType" className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2">Beat Type</TabsTrigger>
-            <TabsTrigger value="advanced" className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2">Advanced Settings</TabsTrigger>
+            <TabsTrigger
+              value="beatType"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2"
+            >
+              Beat Type
+            </TabsTrigger>
+            <TabsTrigger
+              value="advanced"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2"
+            >
+              Advanced Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="beatType" className="mt-2">
@@ -368,8 +424,8 @@ export default function WordsToBeatsForm() {
                   onPressedChange={() => setSelectedBeatType(type)}
                   className={`w-full justify-center capitalize h-12 ${
                     selectedBeatType === type
-                      ? 'bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium'
-                      : 'bg-white hover:bg-gray-50 text-gray-600'
+                      ? "bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium"
+                      : "bg-white hover:bg-gray-50 text-gray-600"
                   }`}
                 >
                   {type}
@@ -419,22 +475,29 @@ export default function WordsToBeatsForm() {
                 className="w-full"
               >
                 <span className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-red-500 animate-pulse' : 'bg-gray-300'}`}></span>
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isRecording ? "bg-red-500 animate-pulse" : "bg-gray-300"
+                    }`}
+                  ></span>
                   {isRecording ? "Recording Enabled" : "Enable Recording"}
                 </span>
               </Toggle>
 
               {audioUrl && (
                 <div className="mt-4 p-3 border rounded-md">
-                  <p className="text-sm font-medium mb-2">Recording Available</p>
+                  <p className="text-sm font-medium mb-2">
+                    Recording Available
+                  </p>
                   <audio controls src={audioUrl} className="w-full" />
                   <div className="flex justify-end mt-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      asChild
-                    >
-                      <a href={audioUrl} download={`words-to-beats-${Date.now()}.webm`}>Download</a>
+                    <Button size="sm" variant="outline" asChild>
+                      <a
+                        href={audioUrl}
+                        download={`words-to-beats-${Date.now()}.webm`}
+                      >
+                        Download
+                      </a>
                     </Button>
                   </div>
                 </div>
