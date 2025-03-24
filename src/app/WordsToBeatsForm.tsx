@@ -300,7 +300,12 @@ export default function WordsToBeatsForm() {
                 bass.triggerAttackRelease(bassNote, "8n", time);
                 break;
               default:
-                synth.triggerAttackRelease(notes[noteIndex], "8n", time);
+                if (synth) {
+                  synth.triggerAttackRelease(notes[noteIndex], "8n", time);
+                } else {
+                  console.error("Synth is not initialized.");
+                }
+                break;
             }
           }
 
