@@ -161,17 +161,12 @@ export default function WordsToBeatsForm() {
   };
 
   const setupRecording = async () => {
-    // Get the audio context and create a media stream destination node
     const audioContext = Tone.getContext().rawContext;
     const dest = (audioContext as AudioContext).createMediaStreamDestination();
 
-    // Connect Tone.js master output to the media stream destination
     Tone.getDestination().connect(dest);
 
-    // Create a media recorder that records the output from Tone.js
     const recorder = new MediaRecorder(dest.stream);
-
-    // Set up event handlers for recording
     chunksRef.current = [];
 
     recorder.ondataavailable = (evt) => {
@@ -182,7 +177,6 @@ export default function WordsToBeatsForm() {
       const blob = new Blob(chunksRef.current, { type: "audio/webm" });
       const url = URL.createObjectURL(blob);
       setAudioUrl(url);
-      setIsRecording(false);
     };
 
     recorderRef.current = recorder;
@@ -363,14 +357,18 @@ export default function WordsToBeatsForm() {
     setText(randomText.trim());
   };
 
-  const toggleRecording = () => {
-    // Toggle recording state
-    setIsRecording(!isRecording);
-
-    // Clear previous recording
-    if (audioUrl) {
-      URL.revokeObjectURL(audioUrl);
-      setAudioUrl(null);
+  const toggleRecording = async () => {
+    if (isRecording) {
+      if (recorderRef.current) {
+        recorderRef.current.stop();
+      }
+      setIsRecording(false);
+    } else {
+      await setupRecording();
+      if (recorderRef.current) {
+        recorderRef.current.start();
+      }
+      setIsRecording(true);
     }
   };
 
@@ -401,7 +399,7 @@ export default function WordsToBeatsForm() {
             variant="outline"
             size="sm"
             onClick={handleRandomize}
-            className="mt-2"
+            className="mt-2 border border-gray-300" // Add gray outline
           >
             Randomize Text
           </Button>
@@ -411,13 +409,13 @@ export default function WordsToBeatsForm() {
           <TabsList className="grid w-full grid-cols-2 p-0 bg-gray-100">
             <TabsTrigger
               value="beatType"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2 border border-gray-300 flex justify-center items-center h-full" // Ensure full coverage
             >
               Beat Type
             </TabsTrigger>
             <TabsTrigger
               value="advanced"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2"
+              className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2 border border-gray-300 flex justify-center items-center h-full" // Ensure full coverage
             >
               Advanced Settings
             </TabsTrigger>
@@ -430,11 +428,11 @@ export default function WordsToBeatsForm() {
                   key={type}
                   pressed={selectedBeatType === type}
                   onPressedChange={() => setSelectedBeatType(type)}
-                  className={`w-full justify-center capitalize h-12 ${
+                  className={`w-full justify-center capitalize h-12 border border-gray-300 ${
                     selectedBeatType === type
                       ? "bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium"
                       : "bg-white hover:bg-gray-50 text-gray-600"
-                  }`}
+                  }`} // Add gray outline
                 >
                   {type}
                 </Toggle>
@@ -447,7 +445,7 @@ export default function WordsToBeatsForm() {
                 pressed={isRecording}
                 onPressedChange={toggleRecording}
                 disabled={isPlaying}
-                className="w-full"
+                className="w-full border border-gray-300" // Add gray outline
               >
                 <span className="flex items-center gap-2">
                   <span
@@ -473,6 +471,7 @@ export default function WordsToBeatsForm() {
                 step={1}
                 value={[bpm]}
                 onValueChange={(value) => setBpm(value[0])}
+                className="border border-gray-300"
               />
             </div>
 
@@ -486,7 +485,7 @@ export default function WordsToBeatsForm() {
                     key={scale}
                     pressed={selectedScale === scale}
                     onPressedChange={() => setSelectedScale(scale)}
-                    className="capitalize"
+                    className="capitalize border border-gray-300" // Add gray outline
                   >
                     {scale}
                   </Toggle>
@@ -500,7 +499,7 @@ export default function WordsToBeatsForm() {
                 pressed={isRecording}
                 onPressedChange={toggleRecording}
                 disabled={isPlaying}
-                className="w-full"
+                className="w-full border border-gray-300" // Add gray outline
               >
                 <span className="flex items-center gap-2">
                   <span
@@ -514,12 +513,31 @@ export default function WordsToBeatsForm() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {audioUrl && (
+          <div className="mt-4 p-3 border rounded-md">
+            <p className="text-sm font-medium mb-2">Recording Available</p>
+            <audio
+              controls
+              src={audioUrl}
+              className="w-full"
+              onError={() => console.error("Error playing audio. Check audioUrl:", audioUrl)}
+            />
+            <div className="flex justify-end mt-2">
+              <Button size="sm" variant="outline" asChild>
+                <a href={audioUrl} download={`words-to-beats-${Date.now()}.webm`}>
+                  Download
+                </a>
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
 
       <CardFooter className="flex justify-end">
         <Button
           onClick={handlePlayPause}
-          className="w-24 bg-violet-400 hover:bg-violet-500 text-white"
+          className="w-24 bg-violet-400 hover:bg-violet-500 text-white border border-gray-300" // Add gray outline
           size="lg"
         >
           {isPlaying ? "Stop" : "Play"}
