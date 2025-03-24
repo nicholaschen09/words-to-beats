@@ -9,6 +9,7 @@ interface VisualizerProps {
 }
 
 export const Visualizer = ({ isPlaying, beatType }: VisualizerProps) => {
+  const [isRecording, setIsRecording] = useState(true);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const analyserRef = useRef<Tone.Analyser | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -60,10 +61,14 @@ export const Visualizer = ({ isPlaying, beatType }: VisualizerProps) => {
       ctx.stroke();
 
       // Add hint text
-      ctx.font = '12px Arial';
-      ctx.fillStyle = '#777';
-      ctx.textAlign = 'center';
-      ctx.fillText('Click Play to start audio', canvas.width / 2, canvas.height - 15);
+      ctx.font = "12px Arial";
+      ctx.fillStyle = "#777";
+      ctx.textAlign = "center";
+      ctx.fillText(
+        "Click Play to start audio",
+        canvas.width / 2,
+        canvas.height - 15
+      );
     };
 
     // Try to initialize the analyser
@@ -195,7 +200,7 @@ export const Visualizer = ({ isPlaying, beatType }: VisualizerProps) => {
 
         for (let x = 0; x < canvas.width; x += 5) {
           // Create a more randomized pattern
-          const y = centerY + (Math.random() * amplitude * 2) - amplitude;
+          const y = centerY + Math.random() * amplitude * 2 - amplitude;
           if (x === 0) {
             ctx.moveTo(x, y);
           } else {
@@ -238,12 +243,110 @@ export const Visualizer = ({ isPlaying, beatType }: VisualizerProps) => {
     };
   }, [isPlaying, beatType, isInitialized]);
 
+  useEffect(() => {
+    // Ensure the visualizer updates when the beat type changes
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Resize canvas to match its container
+    const resizeCanvas = () => {
+      canvas.width = canvas.clientWidth;
+      canvas.height = canvas.clientHeight;
+    };
+
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    // Initialize or reconnect the analyser
+    if (!analyserRef.current) {
+      analyserRef.current = new Tone.Analyser("fft", 1024);
+      Tone.getDestination().connect(analyserRef.current);
+      setIsInitialized(true);
+    }
+
+    // Get colors for the current beat type
+    const getColors = () => {
+      const colorMap: Record<string, { primary: string; secondary: string }> = {
+        drums: { primary: "#f43f5e", secondary: "#fb7185" },
+        synth: { primary: "#8b5cf6", secondary: "#a78bfa" },
+        piano: { primary: "#10b981", secondary: "#34d399" },
+        bass: { primary: "#f97316", secondary: "#fb923c" },
+      };
+      return colorMap[beatType] || colorMap.synth;
+    };
+
+    const colors = getColors();
+
+    // Draw the visualizer
+    const draw = () => {
+      if (!canvas || !ctx) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (isPlaying && analyserRef.current) {
+        const frequencyData = analyserRef.current.getValue() as Float32Array;
+
+        if (frequencyData.length > 0) {
+          const barWidth = (canvas.width / frequencyData.length) * 2.5;
+          const barSpacing = 1;
+
+          for (let i = 0; i < frequencyData.length; i++) {
+            const value = frequencyData[i];
+            const normalizedValue = (value + 140) / 140; // Normalize dB values
+            const barHeight = normalizedValue * canvas.height * 0.8;
+
+            const x = i * (barWidth + barSpacing);
+            const y = canvas.height - barHeight;
+
+            const gradient = ctx.createLinearGradient(0, canvas.height, 0, 0);
+            gradient.addColorStop(0, colors.primary);
+            gradient.addColorStop(1, colors.secondary);
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(x, y, barWidth, barHeight);
+          }
+        }
+      } else {
+        // Draw idle state
+        ctx.beginPath();
+        const centerY = canvas.height / 2;
+        const amplitude = canvas.height / 10;
+        const frequency = 15;
+
+        ctx.moveTo(0, centerY);
+        for (let x = 0; x < canvas.width; x++) {
+          const y = centerY + Math.sin(x / frequency) * amplitude;
+          ctx.lineTo(x, y);
+        }
+
+        ctx.strokeStyle = colors.primary;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      animationRef.current = requestAnimationFrame(draw);
+    };
+
+    animationRef.current = requestAnimationFrame(draw);
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+      if (analyserRef.current) {
+        analyserRef.current.dispose();
+        analyserRef.current = null;
+      }
+    };
+  }, [isPlaying, beatType]); // Ensure beatType changes trigger updates
+
   return (
     <div className="w-full h-full">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full"
-      />
+      <canvas ref={canvasRef} className="w-full h-full" />
     </div>
   );
 };

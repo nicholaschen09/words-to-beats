@@ -15,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Toggle } from "@/components/ui/toggle";
 import * as Tone from "tone";
-import { Visualizer } from "./Visualizer"; // Fixed import statement
+import { Visualizer } from "./Visualizer";
 
 const BEAT_TYPES = ["drums", "synth", "piano", "bass"];
 const NOTE_SCALES = ["major", "minor", "pentatonic", "blues", "chromatic"];
@@ -101,7 +101,6 @@ export default function WordsToBeatsForm() {
 
     let result = "";
     for (let i = 0; i < cleanedInput.length; i++) {
-      // Get character code and use it to determine if we play a note or rest
       const charCode = cleanedInput.charCodeAt(i);
 
       // For vowels, let's use 'x' (play)
@@ -441,6 +440,25 @@ export default function WordsToBeatsForm() {
                 </Toggle>
               ))}
             </div>
+
+            {/* Recording toggle button */}
+            <div className="pt-4">
+              <Toggle
+                pressed={isRecording}
+                onPressedChange={toggleRecording}
+                disabled={isPlaying}
+                className="w-full"
+              >
+                <span className="flex items-center gap-2">
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      isRecording ? "bg-red-500 animate-pulse" : "bg-gray-300"
+                    }`}
+                  ></span>
+                  {isRecording ? "Recording Enabled" : "Enable Recording"}
+                </span>
+              </Toggle>
+            </div>
           </TabsContent>
 
           <TabsContent value="advanced" className="space-y-4">
@@ -476,7 +494,8 @@ export default function WordsToBeatsForm() {
               </div>
             </div>
 
-            <div className="pt-2">
+            {/* Recording toggle button (duplicate for advanced tab) */}
+            <div className="pt-4">
               <Toggle
                 pressed={isRecording}
                 onPressedChange={toggleRecording}
@@ -492,25 +511,6 @@ export default function WordsToBeatsForm() {
                   {isRecording ? "Recording Enabled" : "Enable Recording"}
                 </span>
               </Toggle>
-
-              {audioUrl && (
-                <div className="mt-4 p-3 border rounded-md">
-                  <p className="text-sm font-medium mb-2">
-                    Recording Available
-                  </p>
-                  <audio controls src={audioUrl} className="w-full" />
-                  <div className="flex justify-end mt-2">
-                    <Button size="sm" variant="outline" asChild>
-                      <a
-                        href={audioUrl}
-                        download={`words-to-beats-${Date.now()}.webm`}
-                      >
-                        Download
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-              )}
             </div>
           </TabsContent>
         </Tabs>
