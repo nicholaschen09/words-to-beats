@@ -462,9 +462,8 @@ export default function WordsToBeatsForm() {
                   break;
                 case "hihat":
                   const hihat = new Tone.MetalSynth({
-                    frequency: 200,
-                    envelope: { attack: 0.001, decay: 0.1, release: 0.1 },
                     harmonicity: 5.1,
+                    envelope: { attack: 0.001, decay: 0.1, release: 0.1 },
                     modulationIndex: 32,
                     resonance: 4000,
                     octaves: 1.5,
