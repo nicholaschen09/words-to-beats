@@ -190,6 +190,14 @@ export default function WordsToBeatsForm() {
     );
   };
 
+  const stopPlayback = () => {
+    Tone.Transport.stop();
+    if (sequenceRef.current) {
+      sequenceRef.current.dispose();
+    }
+    setIsPlaying(false);
+  };
+
   const handlePlayPause = async () => {
     if (isPlaying) {
       // Stop playback
@@ -428,7 +436,10 @@ export default function WordsToBeatsForm() {
             id="text-input"
             placeholder="Type or paste text here..."
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              stopPlayback(); // Stop playback when text is edited
+            }}
             className="min-h-32"
           />
           <Button
@@ -473,7 +484,11 @@ export default function WordsToBeatsForm() {
           </Toggle>
         </div>
 
-        <Tabs defaultValue="beatType" className="mt-6">
+        <Tabs
+          defaultValue="beatType"
+          className="mt-6"
+          onValueChange={() => stopPlayback()}
+        >
           <TabsList className="grid w-full grid-cols-2 p-0 gap-2">
             {" "}
             {/* Removed bg-gray-100 */}
@@ -497,7 +512,10 @@ export default function WordsToBeatsForm() {
                 <Toggle
                   key={type}
                   pressed={selectedBeatTypes.includes(type)}
-                  onPressedChange={() => toggleBeatType(type)}
+                  onPressedChange={() => {
+                    toggleBeatType(type);
+                    stopPlayback(); // Stop playback when beat type is changed
+                  }}
                   className={`w-full justify-center capitalize h-12 border border-gray-300 ${
                     selectedBeatTypes.includes(type)
                       ? "bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium"
@@ -521,7 +539,10 @@ export default function WordsToBeatsForm() {
                   <Toggle
                     key={scale}
                     pressed={selectedScale === scale}
-                    onPressedChange={() => setSelectedScale(scale)}
+                    onPressedChange={() => {
+                      setSelectedScale(scale);
+                      stopPlayback(); // Stop playback when a musical scale is clicked
+                    }}
                     className="capitalize border border-gray-300" // Add gray outline
                   >
                     {scale}
