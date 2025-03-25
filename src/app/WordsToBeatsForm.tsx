@@ -463,7 +463,7 @@ export default function WordsToBeatsForm() {
             step={1}
             value={[bpm]}
             onValueChange={(value) => setBpm(value[0])}
-            className="border border-gray-300 bg-gradient-to-r from-black via-gray-800 to-gray-600 text-white" // Black gradient styling
+            className="border border-gray-300 bg-gradient-to-r from-black to-gray-200 text-white" // Gradient from dark black to super light gray
           />
         </div>
 

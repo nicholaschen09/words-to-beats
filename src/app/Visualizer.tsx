@@ -34,13 +34,7 @@ export const Visualizer = ({ isPlaying, beatType }: VisualizerProps) => {
     }
 
     const getColors = () => {
-      const colorMap: Record<string, { primary: string; secondary: string }> = {
-        drums: { primary: "#f43f5e", secondary: "#fb7185" },
-        synth: { primary: "#8b5cf6", secondary: "#a78bfa" },
-        piano: { primary: "#10b981", secondary: "#34d399" },
-        bass: { primary: "#f97316", secondary: "#fb923c" },
-      };
-      return colorMap[beatType] || colorMap.synth;
+      return { primary: "#f43f5e", secondary: "#fb7185" }; // Always red
     };
 
     const draw = () => {
@@ -99,7 +93,7 @@ export const Visualizer = ({ isPlaying, beatType }: VisualizerProps) => {
         analyserRef.current = null;
       }
     };
-  }, [isPlaying, beatType]);
+  }, [isPlaying]);
 
   return (
     <div className="w-full h-full">
