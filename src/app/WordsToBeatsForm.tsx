@@ -41,7 +41,9 @@ export default function WordsToBeatsForm() {
   const [bpm, setBpm] = useState(120);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [selectedBeatTypes, setSelectedBeatTypes] = useState<string[]>([BEAT_TYPES[0]]); // Allow multiple selections
+  const [selectedBeatTypes, setSelectedBeatTypes] = useState<string[]>([
+    BEAT_TYPES[0],
+  ]); // Allow multiple selections
   const [selectedScale, setSelectedScale] = useState(NOTE_SCALES[0]);
   const [synth, setSynth] = useState<TonePolySynth | null>(null);
   const [pattern, setPattern] = useState<string>("");
@@ -412,7 +414,10 @@ export default function WordsToBeatsForm() {
       <CardContent className="space-y-4">
         {/* Visualizer */}
         <div className="w-full h-40 bg-gray-100 dark:bg-gray-800 rounded-md overflow-hidden">
-          <Visualizer isPlaying={isPlaying} beatType={selectedBeatTypes.join(", ")} />
+          <Visualizer
+            isPlaying={isPlaying}
+            beatType={selectedBeatTypes.join(", ")}
+          />
         </div>
 
         <div className="space-y-2">
@@ -436,8 +441,42 @@ export default function WordsToBeatsForm() {
           </Button>
         </div>
 
+        <div className="pt-4">
+          <label htmlFor="bpm-slider" className="text-sm font-medium">
+            Tempo (BPM): {bpm}
+          </label>
+          <Slider
+            id="bpm-slider"
+            min={60}
+            max={200}
+            step={1}
+            value={[bpm]}
+            onValueChange={(value) => setBpm(value[0])}
+            className="border border-gray-300 bg-gradient-to-r from-black via-gray-800 to-gray-600 text-white" // Black gradient styling
+          />
+        </div>
+
+        <div className="pt-4">
+          <Toggle
+            pressed={isRecording}
+            onPressedChange={toggleRecording}
+            className="w-full border border-gray-300" // Add gray outline
+          >
+            <span className="flex items-center gap-2">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  isRecording ? "bg-red-500 animate-pulse" : "bg-gray-300"
+                }`}
+              ></span>
+              {isRecording ? "Recording Enabled" : "Enable Recording"}
+            </span>
+          </Toggle>
+        </div>
+
         <Tabs defaultValue="beatType" className="mt-6">
-          <TabsList className="grid w-full grid-cols-2 p-0 bg-gray-100">
+          <TabsList className="grid w-full grid-cols-2 p-0 gap-2">
+            {" "}
+            {/* Removed bg-gray-100 */}
             <TabsTrigger
               value="beatType"
               className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2 border border-gray-300 flex justify-center items-center h-full" // Ensure full coverage
@@ -469,43 +508,9 @@ export default function WordsToBeatsForm() {
                 </Toggle>
               ))}
             </div>
-
-            {/* Recording toggle button */}
-            <div className="pt-4">
-              <Toggle
-                pressed={isRecording}
-                onPressedChange={toggleRecording}
-                disabled={isPlaying}
-                className="w-full border border-gray-300" // Add gray outline
-              >
-                <span className="flex items-center gap-2">
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      isRecording ? "bg-red-500 animate-pulse" : "bg-gray-300"
-                    }`}
-                  ></span>
-                  {isRecording ? "Recording Enabled" : "Enable Recording"}
-                </span>
-              </Toggle>
-            </div>
           </TabsContent>
 
           <TabsContent value="advanced" className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="bpm-slider" className="text-sm font-medium">
-                Tempo (BPM): {bpm}
-              </label>
-              <Slider
-                id="bpm-slider"
-                min={60}
-                max={200}
-                step={1}
-                value={[bpm]}
-                onValueChange={(value) => setBpm(value[0])}
-                className="border border-gray-300"
-              />
-            </div>
-
             <div className="space-y-2">
               <label htmlFor="scale-select" className="text-sm font-medium">
                 Musical Scale
@@ -523,25 +528,6 @@ export default function WordsToBeatsForm() {
                 ))}
               </div>
             </div>
-
-            {/* Recording toggle button (duplicate for advanced tab) */}
-            <div className="pt-4">
-              <Toggle
-                pressed={isRecording}
-                onPressedChange={toggleRecording}
-                disabled={isPlaying}
-                className="w-full border border-gray-300" // Add gray outline
-              >
-                <span className="flex items-center gap-2">
-                  <span
-                    className={`w-2 h-2 rounded-full ${
-                      isRecording ? "bg-red-500 animate-pulse" : "bg-gray-300"
-                    }`}
-                  ></span>
-                  {isRecording ? "Recording Enabled" : "Enable Recording"}
-                </span>
-              </Toggle>
-            </div>
           </TabsContent>
         </Tabs>
 
@@ -552,11 +538,16 @@ export default function WordsToBeatsForm() {
               controls
               src={audioUrl}
               className="w-full"
-              onError={() => console.error("Error playing audio. Check audioUrl:", audioUrl)}
+              onError={() =>
+                console.error("Error playing audio. Check audioUrl:", audioUrl)
+              }
             />
             <div className="flex justify-end mt-2">
               <Button size="sm" variant="outline" asChild>
-                <a href={audioUrl} download={`words-to-beats-${Date.now()}.webm`}>
+                <a
+                  href={audioUrl}
+                  download={`words-to-beats-${Date.now()}.webm`}
+                >
                   Download
                 </a>
               </Button>
@@ -568,7 +559,7 @@ export default function WordsToBeatsForm() {
       <CardFooter className="flex justify-end">
         <Button
           onClick={handlePlayPause}
-          className="w-24 bg-violet-400 hover:bg-violet-500 text-white border border-gray-300" // Add gray outline
+          className="w-24 bg-black hover:bg-gray-800 text-white border border-gray-300" // Black background and dark gray hover
           size="lg"
         >
           {isPlaying ? "Stop" : "Play"}
