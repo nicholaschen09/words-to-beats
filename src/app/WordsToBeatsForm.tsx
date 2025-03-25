@@ -479,15 +479,15 @@ export default function WordsToBeatsForm() {
             {/* Removed bg-gray-100 */}
             <TabsTrigger
               value="beatType"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2 border border-gray-300 flex justify-center items-center h-full" // Ensure full coverage
+              className="bg-white data-[state=active]:bg-gray-200 data-[state=active]:shadow-none py-2 border border-gray-300 flex justify-center items-center h-full hover:bg-gray-200" // Updated active state to light gray
             >
               Beat Type
             </TabsTrigger>
             <TabsTrigger
               value="advanced"
-              className="data-[state=active]:bg-white data-[state=active]:shadow-none py-2 border border-gray-300 flex justify-center items-center h-full" // Ensure full coverage
+              className="bg-white data-[state=active]:bg-gray-200 data-[state=active]:shadow-none py-2 border border-gray-300 flex justify-center items-center h-full hover:bg-gray-200" // Updated active state to light gray
             >
-              Advanced Settings
+              Musical Scale
             </TabsTrigger>
           </TabsList>
 
@@ -512,9 +512,10 @@ export default function WordsToBeatsForm() {
 
           <TabsContent value="advanced" className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="scale-select" className="text-sm font-medium">
-                Musical Scale
-              </label>
+              <label
+                htmlFor="scale-select"
+                className="text-sm font-medium"
+              ></label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {NOTE_SCALES.map((scale) => (
                   <Toggle
